@@ -324,6 +324,11 @@ class XeroMCPServer {
       throw new Error('Invalid session');
     }
 
+    // Validate tenantId against session tenants if provided
+    if (tenantId && session.tenantId && tenantId !== session.tenantId) {
+      throw new Error('Tenant ID does not match session');
+    }
+
     const accountId = session.accountId;
     const effectiveTenantId = tenantId || session.tenantId;
     if (!effectiveTenantId) {

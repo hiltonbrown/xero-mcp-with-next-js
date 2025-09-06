@@ -1,6 +1,9 @@
 
 import { createClient } from 'redis';
 
+if (!process.env.REDIS_URL && process.env.NODE_ENV === 'production') {
+  throw new Error('REDIS_URL environment variable is required in production');
+}
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
 const redisClient = createClient({
@@ -8,6 +11,7 @@ const redisClient = createClient({
   socket: {
     connectTimeout: 5000,
     reconnectStrategy: (retries) => Math.min(retries * 50, 1000),
+    tls: process.env.NODE_ENV === 'production', // Enable TLS in production
   },
 });
 

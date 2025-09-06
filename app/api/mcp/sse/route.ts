@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGINS || 'https://your-ai-client.com',
         'Access-Control-Allow-Headers': 'Cache-Control',
       },
     });
