@@ -3,6 +3,7 @@
 import { validateOAuthState, exchangeCodeForTokens, createMCPSession } from '@/lib/auth';
 import { storeTokens, storeXeroConnection, createXeroClient } from '@/lib/xero-client';
 import { db } from '@/lib/db';
+import { getCache, deleteCache, cacheKeys } from '@/lib/cache';
 
 export async function GET(request: Request) {
   try {
@@ -27,16 +28,15 @@ export async function GET(request: Request) {
       return Response.redirect(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}?error=invalid_state`, 302);
     }
 
-    // Get PKCE verifier from store
-    const pkceStore = (globalThis as any).pkceStore;
-    const verifier = pkceStore?.get(state);
+    // Get PKCE verifier from cache
+    const verifier = await getCache<string>(cacheKeys.pkce(state));
 
     if (!verifier) {
       return Response.redirect(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}?error=missing_verifier`, 302);
     }
 
-    // Clean up PKCE store
-    pkceStore?.delete(state);
+    // Clean up PKCE verifier from cache
+    await deleteCache(cacheKeys.pkce(state));
 
     // Exchange authorization code for tokens
     const tokens = await exchangeCodeForTokens(code, verifier);

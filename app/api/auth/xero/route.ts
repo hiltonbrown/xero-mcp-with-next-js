@@ -2,6 +2,7 @@
 
 import { generateOAuthState, storeOAuthState, getXeroAuthUrl, generatePKCEChallenge } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { setCache, cacheKeys } from '@/lib/cache';
 
 export async function GET(request: Request) {
   try {
@@ -34,10 +35,8 @@ export async function GET(request: Request) {
     // Store state and PKCE verifier (you might want to store verifier in session/cache)
     await storeOAuthState(state, accountId);
 
-    // For demo purposes, we'll store verifier in a simple in-memory store
-    // In production, use Redis or similar
-    (globalThis as any).pkceStore = (globalThis as any).pkceStore || new Map();
-    (globalThis as any).pkceStore.set(state, verifier);
+    // Store PKCE verifier in cache
+    await setCache(cacheKeys.pkce(state), verifier, 600); // 10 minute TTL
 
     // Generate Xero authorization URL
     const authUrl = getXeroAuthUrl(state, challenge);

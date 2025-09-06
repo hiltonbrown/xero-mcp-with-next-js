@@ -1,4 +1,7 @@
 {
+  "build": {
+    "command": "pnpm run vercel:build"
+  },
   "functions": {
     "app/api/mcp/route.ts": {
       "maxDuration": 300
