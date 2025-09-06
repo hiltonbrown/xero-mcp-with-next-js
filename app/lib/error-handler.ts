@@ -522,6 +522,14 @@ export class ErrorHandler {
   }
 }
 
+// Custom error classes
+export class TokenRefreshError extends Error {
+  constructor(message: string, public originalError?: any) {
+    super(message);
+    this.name = 'TokenRefreshError';
+  }
+}
+
 // Export singleton instance
 export const errorHandler = ErrorHandler.getInstance();
 

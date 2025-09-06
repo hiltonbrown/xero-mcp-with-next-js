@@ -3,6 +3,9 @@
     "app/api/mcp/route.ts": {
       "maxDuration": 300
     },
+    "app/api/mcp/sse/route.ts": {
+      "maxDuration": 300
+    },
     "app/api/auth/**": {
       "maxDuration": 60
     },
@@ -33,7 +36,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "$ALLOWED_ORIGINS"
         },
         {
           "key": "Access-Control-Allow-Methods",

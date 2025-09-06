@@ -35,25 +35,28 @@ export function generateOAuthState() {
 }
 
 export async function storeOAuthState(state: string, accountId?: string) {
-  // Store state in database with optional account association
-  await db.account.updateMany({
-    where: { oauthState: null },
-    data: { oauthState: state }
+  // Create new state record
+  await db.oAuthState.create({
+    data: {
+      state,
+      accountId,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+    }
   });
 }
 
 export async function validateOAuthState(state: string) {
-  const account = await db.account.findFirst({
-    where: { oauthState: state }
+  const oauthState = await db.oAuthState.findUnique({
+    where: { state },
+    include: { account: true }
   });
 
-  if (account) {
-    // Clear the state after use
-    await db.account.update({
-      where: { id: account.id },
-      data: { oauthState: null }
+  if (oauthState && oauthState.expiresAt > new Date()) {
+    // Delete the state after use
+    await db.oAuthState.delete({
+      where: { id: oauthState.id }
     });
-    return account;
+    return oauthState.account;
   }
 
   return null;

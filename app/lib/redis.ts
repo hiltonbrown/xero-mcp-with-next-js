@@ -13,11 +13,16 @@ const redisClient = createClient({
 
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
 
-async function getRedisClient() {
-  if (!redisClient.isOpen) {
-    await redisClient.connect();
-  }
-  return redisClient;
-}
+let connectionPromise: Promise<typeof redisClient> | null = null;
 
-export { getRedisClient };
+export async function getRedisClient() {
+  if (!connectionPromise) {
+    connectionPromise = redisClient.connect()
+      .then(() => redisClient)
+      .catch(err => {
+        connectionPromise = null;
+        throw err;
+      });
+  }
+  return connectionPromise;
+}

@@ -14,7 +14,6 @@ model Account {
   id            String   @id @default(cuid())
   email         String   @unique
   name          String?
-  oauthState    String?  @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -22,8 +21,24 @@ model Account {
   xeroConnections XeroConnection[]
   oauthTokens     OAuthToken[]
   mcpSessions     MCPSession[]
+  oauthStates     OAuthState[]
 
   @@map("accounts")
+}
+
+model OAuthState {
+  id        String   @id @default(cuid())
+  state     String   @unique
+  accountId String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  account   Account? @relation(fields: [accountId], references: [id])
+
+  @@map("oauth_states")
+  @@index([state])
+  @@index([expiresAt])
 }
 
 model XeroConnection {

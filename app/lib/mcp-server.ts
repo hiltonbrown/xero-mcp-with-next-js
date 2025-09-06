@@ -6,6 +6,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import { z } from 'zod';
 import { createXeroTenantClient, getConnectedTenants } from './xero-client';
 import { validateMCPSession } from './auth.js';
+import { getRedisClient } from './redis';
 
 // Tool schemas
 const ListAccountsSchema = z.object({
@@ -87,6 +88,26 @@ class XeroMCPServer {
     );
 
     this.setupToolHandlers();
+    this.setupSessionCleanup();
+  }
+
+  private setupSessionCleanup() {
+    // Clean expired sessions every hour to prevent memory leaks
+    setInterval(() => {
+      const now = new Date();
+      let cleanedCount = 0;
+
+      for (const [sessionId, session] of this.sessions.entries()) {
+        if (session.expiresAt < now) {
+          this.sessions.delete(sessionId);
+          cleanedCount++;
+        }
+      }
+
+      if (cleanedCount > 0) {
+        console.log(`Cleaned up ${cleanedCount} expired MCP sessions`);
+      }
+    }, 60 * 60 * 1000); // Run every hour
   }
 
   private setupToolHandlers() {
@@ -256,23 +277,23 @@ class XeroMCPServer {
       try {
         switch (name) {
           case 'list-accounts':
-            return await this.handleListAccounts(args);
+            return await this.handleListAccounts(args, request.sessionId);
           case 'list-contacts':
-            return await this.handleListContacts(args);
+            return await this.handleListContacts(args, request.sessionId);
           case 'list-invoices':
-            return await this.handleListInvoices(args);
+            return await this.handleListInvoices(args, request.sessionId);
           case 'list-items':
-            return await this.handleListItems(args);
+            return await this.handleListItems(args, request.sessionId);
           case 'list-payments':
-            return await this.handleListPayments(args);
+            return await this.handleListPayments(args, request.sessionId);
           case 'list-bank-transactions':
-            return await this.handleListBankTransactions(args);
+            return await this.handleListBankTransactions(args, request.sessionId);
           case 'create-contact':
-            return await this.handleCreateContact(args);
+            return await this.handleCreateContact(args, request.sessionId);
           case 'create-invoice':
-            return await this.handleCreateInvoice(args);
+            return await this.handleCreateInvoice(args, request.sessionId);
           case 'update-contact':
-            return await this.handleUpdateContact(args);
+            return await this.handleUpdateContact(args, request.sessionId);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -300,84 +321,69 @@ class XeroMCPServer {
     return client;
   }
 
-  private async handleListAccounts(request: any) {
-    const args = request.params.arguments || {};
+  private async handleListAccounts(args: any, sessionId: string) {
     const { tenantId } = ListAccountsSchema.parse(args);
-    const client = await this.getXeroClient(request.sessionId, tenantId);
+    const client = await this.getXeroClient(sessionId, tenantId);
 
     const accounts = await client.getAccounts();
 
     return {
-      jsonrpc: '2.0',
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: `Found ${accounts?.length || 0} accounts`,
-          },
-          {
-            type: 'json',
-            json: accounts || [],
-          },
-        ],
-      },
-      id: request.id
+      content: [
+        {
+          type: 'text',
+          text: `Found ${accounts?.length || 0} accounts`,
+        },
+        {
+          type: 'json',
+          json: accounts || [],
+        },
+      ],
     };
   }
 
-  private async handleListContacts(request: any) {
-    const args = request.params.arguments || {};
+  private async handleListContacts(args: any, sessionId: string) {
     const { tenantId, where, page = 1, pageSize = 100 } = ListContactsSchema.parse(args);
-    const client = await this.getXeroClient(request.sessionId, tenantId);
+    const client = await this.getXeroClient(sessionId, tenantId);
 
     const contacts = await client.getContacts();
 
     return {
-      jsonrpc: '2.0',
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: `Found ${contacts?.length || 0} contacts`,
-          },
-          {
-            type: 'json',
-            json: contacts || [],
-          },
-        ],
-      },
-      id: request.id
+      content: [
+        {
+          type: 'text',
+          text: `Found ${contacts?.length || 0} contacts`,
+        },
+        {
+          type: 'json',
+          json: contacts || [],
+        },
+      ],
     };
   }
 
-  private async handleListInvoices(request: any) {
-    const args = request.params.arguments || {};
+  private async handleListInvoices(args: any, sessionId: string) {
     const { tenantId, status, dateFrom, dateTo } = ListInvoicesSchema.parse(args);
-    const client = await this.getXeroClient(request.sessionId, tenantId);
+    const client = await this.getXeroClient(sessionId, tenantId);
 
     const invoices = await client.getInvoices();
 
     return {
-      jsonrpc: '2.0',
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: `Found ${invoices?.length || 0} invoices`,
-          },
-          {
-            type: 'json',
-            json: invoices || [],
-          },
-        ],
-      },
-      id: request.id
+      content: [
+        {
+          type: 'text',
+          text: `Found ${invoices?.length || 0} invoices`,
+        },
+        {
+          type: 'json',
+          json: invoices || [],
+        },
+      ],
     };
   }
 
-  private async handleListItems(args: any) {
+  private async handleListItems(args: any, sessionId: string) {
     const { tenantId } = args;
-    const client = await this.getXeroClient(args.sessionId, tenantId);
+    const client = await this.getXeroClient(sessionId, tenantId);
 
     // Note: Xero API doesn't have a direct items endpoint, this would need to be implemented
     // based on your specific requirements
@@ -391,9 +397,9 @@ class XeroMCPServer {
     };
   }
 
-  private async handleListPayments(args: any) {
+  private async handleListPayments(args: any, sessionId: string) {
     const { tenantId } = args;
-    const client = await this.getXeroClient(args.sessionId, tenantId);
+    const client = await this.getXeroClient(sessionId, tenantId);
 
     // Note: This would need to be implemented based on Xero's payment endpoints
     return {
@@ -406,9 +412,9 @@ class XeroMCPServer {
     };
   }
 
-  private async handleListBankTransactions(args: any) {
+  private async handleListBankTransactions(args: any, sessionId: string) {
     const { tenantId } = args;
-    const client = await this.getXeroClient(args.sessionId, tenantId);
+    const client = await this.getXeroClient(sessionId, tenantId);
 
     // Note: This would need to be implemented based on Xero's bank transaction endpoints
     return {
@@ -421,63 +427,48 @@ class XeroMCPServer {
     };
   }
 
-  private async handleCreateContact(request: any) {
-    const args = request.params.arguments || {};
+  private async handleCreateContact(args: any, sessionId: string) {
     const validatedArgs = CreateContactSchema.parse(args);
-    const client = await this.getXeroClient(request.sessionId, validatedArgs.tenantId);
+    const client = await this.getXeroClient(sessionId, validatedArgs.tenantId);
 
     // Note: This would need to be implemented using Xero's create contact API
     return {
-      jsonrpc: '2.0',
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: 'Contact creation not yet implemented',
-          },
-        ],
-      },
-      id: request.id
+      content: [
+        {
+          type: 'text',
+          text: 'Contact creation not yet implemented',
+        },
+      ],
     };
   }
 
-  private async handleCreateInvoice(request: any) {
-    const args = request.params.arguments || {};
+  private async handleCreateInvoice(args: any, sessionId: string) {
     const validatedArgs = CreateInvoiceSchema.parse(args);
-    const client = await this.getXeroClient(request.sessionId, validatedArgs.tenantId);
+    const client = await this.getXeroClient(sessionId, validatedArgs.tenantId);
 
     // Note: This would need to be implemented using Xero's create invoice API
     return {
-      jsonrpc: '2.0',
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: 'Invoice creation not yet implemented',
-          },
-        ],
-      },
-      id: request.id
+      content: [
+        {
+          type: 'text',
+          text: 'Invoice creation not yet implemented',
+        },
+      ],
     };
   }
 
-  private async handleUpdateContact(request: any) {
-    const args = request.params.arguments || {};
+  private async handleUpdateContact(args: any, sessionId: string) {
     const validatedArgs = UpdateContactSchema.parse(args);
-    const client = await this.getXeroClient(request.sessionId, validatedArgs.tenantId);
+    const client = await this.getXeroClient(sessionId, validatedArgs.tenantId);
 
     // Note: This would need to be implemented using Xero's update contact API
     return {
-      jsonrpc: '2.0',
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: 'Contact update not yet implemented',
-          },
-        ],
-      },
-      id: request.id
+      content: [
+        {
+          type: 'text',
+          text: 'Contact update not yet implemented',
+        },
+      ],
     };
   }
 
@@ -500,6 +491,22 @@ class XeroMCPServer {
 
   getServer() {
     return this.server;
+  }
+
+  // Publish events to Redis for SSE broadcasting
+  async publishEvent(sessionId: string, event: any) {
+    try {
+      const redis = await getRedisClient();
+      const eventData = {
+        ...event,
+        timestamp: new Date().toISOString(),
+        sessionId
+      };
+
+      await redis.publish(`mcp:events:${sessionId}`, JSON.stringify(eventData));
+    } catch (error) {
+      console.error('Failed to publish MCP event:', error);
+    }
   }
 
   async processRequest(request: any, sessionId: string) {
@@ -666,19 +673,26 @@ class XeroMCPServer {
     const { name, arguments: args } = request.params;
 
     try {
+      const sessionId = (request as any).sessionId as string;
       switch (name) {
         case 'list-accounts':
-          return await this.handleListAccounts({ ...request, params: { arguments: args } });
+          return await this.handleListAccounts(args, sessionId);
         case 'list-contacts':
-          return await this.handleListContacts({ ...request, params: { arguments: args } });
+          return await this.handleListContacts(args, sessionId);
         case 'list-invoices':
-          return await this.handleListInvoices({ ...request, params: { arguments: args } });
+          return await this.handleListInvoices(args, sessionId);
+        case 'list-items':
+          return await this.handleListItems(args, sessionId);
+        case 'list-payments':
+          return await this.handleListPayments(args, sessionId);
+        case 'list-bank-transactions':
+          return await this.handleListBankTransactions(args, sessionId);
         case 'create-contact':
-          return await this.handleCreateContact({ ...request, params: { arguments: args } });
+          return await this.handleCreateContact(args, sessionId);
         case 'create-invoice':
-          return await this.handleCreateInvoice({ ...request, params: { arguments: args } });
+          return await this.handleCreateInvoice(args, sessionId);
         case 'update-contact':
-          return await this.handleUpdateContact({ ...request, params: { arguments: args } });
+          return await this.handleUpdateContact(args, sessionId);
         default:
           return {
             jsonrpc: '2.0',

@@ -5,9 +5,28 @@ import { db } from './db';
 import { refreshAccessToken } from './auth';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
+// Custom error class for token refresh failures
+export class TokenRefreshError extends Error {
+  constructor(message: string, public originalError?: any) {
+    super(message);
+    this.name = 'TokenRefreshError';
+  }
+}
+
 const XERO_CLIENT_ID = process.env.XERO_CLIENT_ID!;
 const XERO_CLIENT_SECRET = process.env.XERO_CLIENT_SECRET!;
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default-key-change-in-production';
+
+// Secure encryption key handling - fail fast in production
+let ENCRYPTION_KEY: string;
+if (process.env.ENCRYPTION_KEY) {
+  ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+} else {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('ENCRYPTION_KEY environment variable is required in production');
+  }
+  console.warn('⚠️ Using insecure default encryption key for development only');
+  ENCRYPTION_KEY = randomBytes(32).toString('hex');
+}
 
 // Encryption utilities for sensitive data
 function encrypt(text: string): string {
@@ -109,7 +128,15 @@ export async function getValidTokens(accountId: string, tenantId?: string) {
       accessToken = newTokens.access_token;
     } catch (error) {
       console.error('Token refresh failed:', error);
-      return null;
+
+      // Mark token as invalid in database to prevent further attempts
+      await db.oAuthToken.update({
+        where: { id: tokenRecord.id },
+        data: { expiresAt: new Date(0) } // Mark as expired
+      });
+
+      // Throw proper error instead of silent failure
+      throw new TokenRefreshError('Failed to refresh Xero token', error);
     }
   }
 
@@ -133,13 +160,21 @@ export class XeroTenantClient {
   }
 
   async initialize() {
-    const tokens = await getValidTokens(this.accountId, this.tenantId);
-    if (!tokens) {
-      throw new Error('No valid tokens found for tenant');
-    }
+    try {
+      const tokens = await getValidTokens(this.accountId, this.tenantId);
+      if (!tokens) {
+        throw new Error('No valid tokens found for tenant');
+      }
 
-    await this.client.setTokenSet(tokens);
-    await this.client.updateTenants();
+      await this.client.setTokenSet(tokens);
+      await this.client.updateTenants();
+    } catch (error) {
+      if (error instanceof TokenRefreshError) {
+        // Re-throw token refresh errors with context
+        throw new Error(`Token refresh failed for tenant ${this.tenantId}: ${error.message}`);
+      }
+      throw error;
+    }
   }
 
   async getInvoices() {

@@ -2,6 +2,15 @@
 
 import { mcpServer } from '@/lib/mcp-server';
 import { validateMCPSession } from '@/lib/auth';
+import { z } from 'zod';
+
+// MCP request validation schema
+const MCPRequestSchema = z.object({
+  jsonrpc: z.literal('2.0'),
+  method: z.string(),
+  params: z.any().optional(),
+  id: z.union([z.string(), z.number(), z.null()])
+});
 
 export async function GET(request: Request) {
   // Handle MCP server info request
@@ -19,7 +28,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = MCPRequestSchema.parse(await request.json());
     const url = new URL(request.url);
     const sessionId = url.searchParams.get('sessionId');
 
