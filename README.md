@@ -1,4 +1,4 @@
-# Xero MCP Integration Server 🚀
+# Xero MCP Integration Server
 
 [![Build Status](https://github.com/hiltonbrown/xero-mcp-with-next-js/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/hiltonbrown/xero-mcp-with-next-js/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,24 +10,24 @@
 
 Transform your Xero workflow with AI-powered insights and automation. This server enables AI assistants like Claude, ChatGPT, or any Model Context Protocol (MCP) compatible AI to securely access and analyze your Xero accounting data.
 
-## ✨ Features
+## Features
 
-- 🔐 **Secure OAuth 2.0 Integration** - Enterprise-grade authentication with Xero
-- 🤖 **AI Assistant Compatible** - Works with Claude, ChatGPT, and other MCP clients
-- ⚡ **Real-time Data Access** - Live synchronization with Xero accounting data
-- 🛡️ **Enterprise Security** - Encrypted tokens, CSRF protection, and audit logging
-- 📊 **Comprehensive API Coverage** - Invoices, contacts, accounts, payments, and more
-- 🚀 **Production Ready** - Optimized for Vercel deployment with monitoring
+- **Secure OAuth 2.0 Integration** - Enterprise-grade authentication with Xero
+- **AI Assistant Compatible** - Works with Claude, ChatGPT, and other MCP clients
+- **Real-time Data Access** - Live synchronization with Xero accounting data
+- **Enterprise Security** - Encrypted tokens, CSRF protection, and audit logging
+- **Comprehensive API Coverage** - Invoices, contacts, accounts, payments, and more
+- **Production Ready** - Optimized for Vercel deployment with monitoring
 
-## 🎯 What You Can Do
+## What You Can Do
 
-✅ **Instant Financial Insights** - Ask "What's my cash flow trend this quarter?"
-✅ **Automated Reporting** - Generate reports with natural language requests
-✅ **Smart Data Entry** - AI-assisted invoice and transaction management
-✅ **Real-time Alerts** - Get notified about important financial events
-✅ **Multi-tenant Support** - Connect multiple Xero organizations
+**Instant Financial Insights** - Ask "What's my cash flow trend this quarter?"
+**Automated Reporting** - Generate reports with natural language requests
+**Smart Data Entry** - AI-assisted invoice and transaction management
+**Real-time Alerts** - Get notified about important financial events
+**Multi-tenant Support** - Connect multiple Xero organizations
 
-## 🚀 Quick Start
+## Quick Start
 
 Get up and running in 3 minutes:
 
@@ -67,7 +67,7 @@ Visit `http://localhost:3000` and follow the OAuth flow to connect your Xero acc
 - [Security](#-security)
 - [License](#-license)
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have:
 
@@ -76,7 +76,7 @@ Before you begin, ensure you have:
 - **PostgreSQL Database** - Local or cloud (Supabase, Railway, etc.)
 - **Vercel Account** (optional) - For deployment
 
-## 🛠️ Installation
+## Installation
 
 ### Option 1: Local Development (Recommended)
 
@@ -116,7 +116,7 @@ docker-compose exec app npx prisma migrate deploy
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/hiltonbrown/xero-mcp-with-next-js)
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -167,7 +167,7 @@ npx prisma migrate deploy
 npx prisma db seed
 ```
 
-## 💡 Usage
+## Usage
 
 ### Connecting AI Assistants
 
@@ -289,7 +289,7 @@ X-Xero-Signature: <signature>
 }
 ```
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -314,7 +314,7 @@ npm run test:watch
 - **Integration Tests**: End-to-end OAuth and MCP flows
 - **Component Tests**: React component testing
 
-## 🚀 Deployment
+## Deployment
 
 ### Vercel Deployment
 
@@ -350,7 +350,7 @@ docker run -p 3000:3000 xero-mcp
 - [ ] Backup procedures documented
 - [ ] Load testing completed
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
@@ -402,7 +402,7 @@ test: add integration tests for webhook handling
 refactor: improve error handling in auth module
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -449,12 +449,12 @@ curl http://localhost:3000/api/health
 
 ### Getting Help
 
-- 📖 **Documentation**: [Full API Docs](https://docs.example.com)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/hiltonbrown/xero-mcp-with-next-js/discussions)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/hiltonbrown/xero-mcp-with-next-js/issues)
-- 📧 **Email**: support@example.com
+- **Documentation**: [Full API Docs](https://docs.example.com)
+- **Discussions**: [GitHub Discussions](https://github.com/hiltonbrown/xero-mcp-with-next-js/discussions)
+- **Issues**: [GitHub Issues](https://github.com/hiltonbrown/xero-mcp-with-next-js/issues)
+- **Email**: support@example.com
 
-## 🔒 Security
+## Security
 
 ### Data Protection
 - **Encrypted Tokens**: All sensitive data encrypted with AES-256
@@ -471,7 +471,7 @@ curl http://localhost:3000/api/health
 ### Security Reporting
 If you discover a security vulnerability, please email security@example.com instead of creating a public issue.
 
-## 📊 Roadmap
+## Roadmap
 
 ### Version 2.0 (Coming Soon)
 - [ ] Advanced reporting tools
@@ -487,19 +487,19 @@ If you discover a security vulnerability, please email security@example.com inst
 - [x] Comprehensive testing suite
 - [x] Production deployment ready
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Xero API** - For providing excellent accounting APIs
 - **Model Context Protocol** - For the AI assistant integration standard
 - **Next.js Community** - For the amazing React framework
 - **Vercel** - For the best deployment platform
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ for accountants and AI enthusiasts**
+**Made with ❤️ for Accountants, Bookkeepers and AI enthusiasts**
 
-[⭐ Star us on GitHub](https://github.com/hiltonbrown/xero-mcp-with-next-js) • [📖 Documentation](https://docs.example.com) • [🐛 Report Issues](https://github.com/hiltonbrown/xero-mcp-with-next-js/issues)
+[⭐ Star us on GitHub](https://github.com/hiltonbrown/xero-mcp-with-next-js) • [📖 Documentation](Still to do) • [🐛 Report Issues](https://github.com/hiltonbrown/xero-mcp-with-next-js/issues)
