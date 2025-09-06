@@ -1,19 +1,49 @@
 {
   "functions": {
     "app/api/mcp/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/auth/**": {
+      "maxDuration": 60
+    },
+    "app/api/webhooks/**": {
       "maxDuration": 30
-    },
-    "app/api/auth/*/route.ts": {
-      "maxDuration": 10
-    },
-    "app/api/webhooks/*/route.ts": {
-      "maxDuration": 10
     }
   },
-  "rewrites": [
+  "crons": [
     {
-      "source": "/api/mcp",
-      "destination": "/api/mcp"
+      "path": "/api/maintenance/cleanup-sessions",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/maintenance/refresh-tokens",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/oauth/callback",
+      "destination": "/api/auth/callback",
+      "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        }
+      ]
     }
   ]
 }
