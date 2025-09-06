@@ -213,3 +213,110 @@ When deploying updates:
 4. Test OAuth flow after deployment
 5. Verify database migrations ran successfully
 6. Check MCP tool functionality
+
+## 🛡️ Production Optimizations
+
+### Error Handling & Monitoring
+
+#### Centralized Error Handling
+- **Error Classification**: User-facing, system, recoverable, and critical errors
+- **Structured Logging**: Comprehensive error logging with context
+- **MCP Error Responses**: Protocol-compliant error responses
+- **HTTP Error Mapping**: Proper HTTP status codes for different error types
+
+#### Monitoring & Analytics
+- **MCP Tool Usage**: Track tool execution time and success rates
+- **Xero API Monitoring**: API call patterns and error rates
+- **Performance Metrics**: Response times and system health
+- **Security Events**: Failed authentications and suspicious activity
+
+#### Health Checks
+- **System Health**: `/api/health` endpoint for overall system status
+- **Database Connectivity**: Automatic database health monitoring
+- **External Dependencies**: Xero API and external service monitoring
+- **Detailed Diagnostics**: POST `/api/health` for comprehensive system checks
+
+### Performance Optimizations
+
+#### Caching Strategy
+- **Xero Data Cache**: 5-minute TTL for frequently accessed data
+- **Session Cache**: Fast session validation and storage
+- **Tool Result Cache**: MCP tool execution result caching
+- **Connection Pooling**: Optimized database and HTTP client connections
+
+#### Webhook Management
+- **Signature Verification**: HMAC-SHA256 signature validation
+- **Idempotent Processing**: Duplicate event prevention
+- **Event Queuing**: High-volume webhook handling
+- **Audit Logging**: Complete webhook event tracking
+
+#### Maintenance Operations
+- **Session Cleanup**: Daily cleanup of expired MCP sessions
+- **Token Refresh**: Automatic OAuth token renewal
+- **Cache Management**: Periodic cache cleanup and optimization
+- **Database Maintenance**: Automated database optimization routines
+
+### Security Enhancements
+
+#### Request Security
+- **CORS Configuration**: Proper cross-origin request handling
+- **Security Headers**: XSS protection, content type options, frame options
+- **Rate Limiting**: Built-in rate limiting for API endpoints
+- **Input Validation**: Comprehensive request validation
+
+#### Data Protection
+- **Encrypted Tokens**: AES-256-CBC encryption for sensitive data
+- **Secure Sessions**: Session-based authentication with expiration
+- **Webhook Security**: Signature verification for webhook authenticity
+- **Environment Security**: Secure environment variable handling
+
+### Production Deployment Checklist
+
+#### Pre-Deployment
+- [ ] Environment variables validated and secured
+- [ ] Database migrations tested and ready
+- [ ] SSL certificates configured
+- [ ] Monitoring and alerting set up
+- [ ] Backup procedures documented
+
+#### Deployment Verification
+- [ ] OAuth flow tested end-to-end
+- [ ] MCP tools functional and responsive
+- [ ] Webhook endpoints responding correctly
+- [ ] Health check endpoints operational
+- [ ] Error handling working as expected
+
+#### Post-Deployment
+- [ ] Load testing completed for high concurrency
+- [ ] Monitoring dashboards configured
+- [ ] Alerting rules set up for critical errors
+- [ ] Performance benchmarks established
+- [ ] Documentation updated with new features
+
+#### Operational Procedures
+- [ ] Incident response procedures documented
+- [ ] Backup and recovery procedures tested
+- [ ] Monitoring and alerting verified
+- [ ] Support contact information updated
+- [ ] Runbook for common issues created
+
+## 📊 Monitoring & Alerting
+
+### Key Metrics to Monitor
+- **MCP Tool Performance**: Average execution time, success rate
+- **Xero API Usage**: Call volume, error rates, response times
+- **System Health**: CPU, memory, database connections
+- **Security Events**: Failed logins, suspicious activity
+- **User Activity**: Active sessions, tool usage patterns
+
+### Alerting Rules
+- **Critical**: System down, database unreachable
+- **High**: High error rates, OAuth failures
+- **Medium**: Performance degradation, webhook failures
+- **Low**: Increased latency, cache misses
+
+### Log Analysis
+- **Error Patterns**: Identify common failure modes
+- **Performance Trends**: Monitor system performance over time
+- **Security Incidents**: Track and analyze security events
+- **User Behavior**: Understand usage patterns and needs
