@@ -1,7 +1,11 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 
-const origin = process.env.MCP_SERVER_URL || process.argv[2] || "http://localhost:3000";
+const origin = process.env.MCP_SERVER_URL || process.argv[2];
+if (!origin) {
+  console.error('MCP_SERVER_URL environment variable or command line argument required');
+  process.exit(1);
+}
 
 async function main() {
   const transport = new SSEClientTransport(new URL(`${origin}/api/mcp/sse?sessionId=test-session`));

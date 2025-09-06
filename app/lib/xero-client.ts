@@ -208,7 +208,67 @@ export class XeroTenantClient {
   }
 
   // Add more Xero API methods as needed
-}
+
+  async getItems() {
+    try {
+      const response = await this.client.accountingApi.getItems(this.tenantId);
+      return response.body.items;
+    } catch (error) {
+      console.error('Error fetching items:', error);
+      throw error;
+    }
+  }
+
+  async getPayments() {
+    try {
+      const response = await this.client.accountingApi.getPayments(this.tenantId);
+      return response.body.payments;
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+      throw error;
+    }
+  }
+
+  async getBankTransactions() {
+    try {
+      const response = await this.client.accountingApi.getBankTransactions(this.tenantId);
+      return response.body.bankTransactions;
+    } catch (error) {
+      console.error('Error fetching bank transactions:', error);
+      throw error;
+    }
+  }
+
+  async createContact(contactData: any) {
+    try {
+      const response = await this.client.accountingApi.createContact(this.tenantId, contactData);
+      return response;
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      throw error;
+    }
+  }
+
+  async createInvoice(invoiceData: any) {
+    try {
+      const response = await this.client.accountingApi.createInvoice(this.tenantId, invoiceData);
+      return response;
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+      throw error;
+    }
+  }
+
+  async updateContact(contactData: any) {
+    try {
+      const response = await this.client.accountingApi.updateContact(this.tenantId, contactData);
+      return response;
+    } catch (error) {
+      console.error('Error updating contact:', error);
+      throw error;
+    }
+  }
+ }
 
 // Factory function to create tenant-specific client
 export async function createXeroTenantClient(accountId: string, tenantId: string) {
