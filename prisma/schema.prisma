@@ -10,10 +10,92 @@ datasource db {
   url = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Account {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  oauthState    String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  xeroConnections XeroConnection[]
+  oauthTokens     OAuthToken[]
+  mcpSessions     MCPSession[]
+
+  @@map("accounts")
+}
+
+model XeroConnection {
+  id            String   @id @default(cuid())
+  tenantId      String   @unique
+  tenantName    String
+  tenantType    String
+  accountId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  account       Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  oauthTokens   OAuthToken[]
+  webhookEvents WebhookEvent[]
+
+  @@map("xero_connections")
+}
+
+model OAuthToken {
+  id            String   @id @default(cuid())
+  accessToken   String   // Encrypted
+  refreshToken  String   // Encrypted
+  expiresAt     DateTime
+  tokenType     String   @default("Bearer")
+  scope         String
+  accountId     String
+  tenantId      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  account       Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  xeroConnection XeroConnection? @relation(fields: [tenantId], references: [tenantId])
+
+  @@map("oauth_tokens")
+  @@index([accountId])
+  @@index([tenantId])
+}
+
+model WebhookEvent {
+  id            String   @id @default(cuid())
+  eventType     String
+  resourceId    String
+  resourceType  String
+  payload       Json
+  processed     Boolean  @default(false)
+  tenantId      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  xeroConnection XeroConnection @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@map("webhook_events")
+  @@index([tenantId])
+  @@index([processed])
+}
+
+model MCPSession {
+  id            String   @id @default(cuid())
+  sessionId     String   @unique
+  accountId     String
+  tenantId      String?
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  account       Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("mcp_sessions")
+  @@index([sessionId])
+  @@index([accountId])
 }
