@@ -9,5 +9,11 @@
     "app/api/webhooks/*/route.ts": {
       "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/mcp",
+      "destination": "/api/mcp"
+    }
+  ]
 }

@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['@modelcontextprotocol/sdk'],
-  },
+  serverExternalPackages: ['@modelcontextprotocol/sdk'],
   // MCP server optimizations
   api: {
     bodyParser: {
